@@ -1,12 +1,10 @@
 const pool = require("./database");
 
-// Récupérer tous les paiements
-async function getPayments() {
+async function getPayment() {
   const connection = await pool.getConnection();
   try {
-    const [rows, _fields] = await connection.execute(
-      "SELECT * FROM   payments"
-    );
+    const [rows, _fields] = await connection.execute("SELECT * FROM payments");
+    console.table(rows);
     return rows;
   } catch (error) {
     throw error;
@@ -15,15 +13,14 @@ async function getPayments() {
   }
 }
 
-// Ajouter un paiement
-async function addPayment(date, amount, payment_method) {
+async function addPayment(date, amount, payment_method, order_id) {
   const connection = await pool.getConnection();
   try {
     const [result] = await connection.execute(
-      "INSERT INTO   payments (date, amount, payment_method, order_id) VALUES (?, ?, ?)",
+      "INSERT INTO   payments (date, amount, payment_method, order_id) VALUES (?, ?, ?, ?)",
       [date, amount, payment_method, order_id]
     );
-    return result.insertId;
+    console.log("Payment: with ${id} has been added", result.insertId);
   } catch (error) {
     throw error;
   } finally {
@@ -31,8 +28,7 @@ async function addPayment(date, amount, payment_method) {
   }
 }
 
-// Mettre à jour un paiement
-async function updatePayment(id, date, amount, payment_method) {
+async function updatePayment(id, date, amount, payment_method, order_id) {
   const connection = await pool.getConnection();
   try {
     const [result] = await connection.execute(
@@ -47,7 +43,6 @@ async function updatePayment(id, date, amount, payment_method) {
   }
 }
 
-// Supprimer un paiement
 async function deletePayment(id) {
   const connection = await pool.getConnection();
   try {
@@ -59,7 +54,7 @@ async function deletePayment(id) {
   } catch (error) {
     if (error.code === "ER_ROW_IS_REFERENCED_2") {
       throw new Error(
-        `Erreur de suppression : le paiement ${id} est référencé par une autre table.`
+        `Error of deleted : the payment ${id} is référence by another table.`
       );
     }
     throw error;
@@ -68,4 +63,4 @@ async function deletePayment(id) {
   }
 }
 
-module.exports = { getPayments, addPayment, updatePayment, deletePayment };
+module.exports = { getPayment, addPayment, updatePayment, deletePayment };

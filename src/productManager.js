@@ -1,19 +1,18 @@
 const pool = require("./database");
 
-// Récupérer tous les produits
-async function getProducts() {
+async function getProduct() {
   const connection = await pool.getConnection();
   try {
     const [rows, _fields] = await connection.execute("SELECT * FROM products");
+    console.table(rows);
     return rows;
   } catch (error) {
-    throw error;
+    console.log("Erreur lors de l'affichage des produits:", error.message);
   } finally {
     connection.release();
   }
 }
 
-// Ajouter un produit
 async function addProduct(
   name,
   description,
@@ -29,15 +28,16 @@ async function addProduct(
       "INSERT INTO products (name, description, price, stock, category, barcode, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [name, description, price, stock, category, barcode, status]
     );
-    return result.insertId;
+    // return result.insertId;
+    console.log(`Product: with ${id} has been added`);
   } catch (error) {
-    throw error;
+    // throw error;
+    console.log("Erreur for added product");
   } finally {
     connection.release();
   }
 }
 
-// Mettre à jour un produit
 async function updateProduct(
   id,
   name,
@@ -54,7 +54,8 @@ async function updateProduct(
       "UPDATE products SET name = ?, description = ?, price = ?, stock = ?, category = ?, barcode = ?, status = ? WHERE id = ?",
       [name, description, price, stock, category, barcode, status, id]
     );
-    return result.affectedRows;
+    // return result.affectedRows;
+    console.log(`product: ${id}  has been updated`, result.affectedRows);
   } catch (error) {
     throw error;
   } finally {
@@ -62,7 +63,6 @@ async function updateProduct(
   }
 }
 
-// Supprimer un produit
 async function deleteProduct(id) {
   const connection = await pool.getConnection();
   try {
@@ -70,7 +70,8 @@ async function deleteProduct(id) {
       "DELETE FROM products WHERE id = ?",
       [id]
     );
-    return result.affectedRows;
+    // return result.affectedRows;
+    console.log(`product: ${id}  has been deleted`);
   } catch (error) {
     if (error.code === "ER_ROW_IS_REFERENCED_2") {
       throw new Error(
@@ -83,4 +84,4 @@ async function deleteProduct(id) {
   }
 }
 
-module.exports = { getProducts, addProduct, updateProduct, deleteProduct };
+module.exports = { getProduct, addProduct, updateProduct, deleteProduct };

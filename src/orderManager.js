@@ -1,12 +1,17 @@
 const pool = require("./database");
 
-// Récupérer toutes les commandes
-async function getOrders() {
+async function getOrder() {
   const connection = await pool.getConnection();
   try {
-    const [rows, _fields] = await connection.execute(
-      "SELECT * FROM  purchase_orders"
+    const [rows] = await connection.execute(
+      `SELECT po.id AS order_id, po.date, po.delivery_address, po.track_number, po.status, po.customer_id, 
+              od.product_id, od.quantity, od.price
+       FROM purchase_orders po
+       LEFT JOIN order_details od ON po.id = od.order_id
+       ORDER BY po.id`
     );
+
+    console.table(rows);
     return rows;
   } catch (error) {
     throw error;
@@ -15,31 +20,31 @@ async function getOrders() {
   }
 }
 
-// Ajouter une commande avec ses détails
+// Add an order and its details
 async function addOrder(
   date,
   delivery_address,
   track_number,
   status,
+  customerId,
   orderDetails
 ) {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
 
-    // Ajouter la commande principale
     const [orderResult] = await connection.execute(
-      "INSERT INTO  purchase_orders (date, delivery_address, track_number, status) VALUES (?, ?, ?, ?)",
-      [date, delivery_address, track_number, status]
+      "INSERT INTO purchase_orders (date, delivery_address, track_number, status, customer_id) VALUES (?, ?, ?, ?, ?)",
+      [date, delivery_address, track_number, status, customerId]
     );
 
     const orderId = orderResult.insertId;
 
-    // Ajouter les détails de la commande associés
+    // Add all order details
     for (const detail of orderDetails) {
       const { productId, quantity, price } = detail;
       await connection.execute(
-        "INSERT INTO  order_details (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)",
+        "INSERT INTO order_details (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)",
         [orderId, productId, quantity, price]
       );
     }
@@ -54,35 +59,35 @@ async function addOrder(
   }
 }
 
-// Mettre à jour une commande et ses détails
 async function updateOrder(
   orderId,
   date,
   delivery_address,
   track_number,
   status,
+  customerId,
   orderDetails
 ) {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
 
-    // Mettre à jour la commande principale
+    // Update the main order
     await connection.execute(
-      "UPDATE  purchase_orders SET date = ?, delivery_address = ?, track_number = ?, status = ? WHERE id = ?",
-      [date, delivery_address, track_number, status, orderId]
+      "UPDATE purchase_orders SET date = ?, delivery_address = ?, track_number = ?, status = ?, customer_id = ? WHERE id = ?",
+      [date, delivery_address, track_number, status, customerId, orderId]
     );
 
-    // Supprimer les détails de la commande existants
-    await connection.execute("DELETE FROM  order_details WHERE order_id = ?", [
+    // Delete all existing details of the order
+    await connection.execute("DELETE FROM order_details WHERE order_id = ?", [
       orderId,
     ]);
 
-    // Réinsérer les détails de la commande mis à jour
+    // Re-insert updated order details
     for (const detail of orderDetails) {
       const { productId, quantity, price } = detail;
       await connection.execute(
-        "INSERT INTO  order_details (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)",
+        "INSERT INTO order_details (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)",
         [orderId, productId, quantity, price]
       );
     }
@@ -97,19 +102,18 @@ async function updateOrder(
   }
 }
 
-// Supprimer une commande et ses détails
 async function deleteOrder(orderId) {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
 
-    // Supprimer d'abord les détails de la commande
-    await connection.execute("DELETE FROM  order_details WHERE order_id = ?", [
+    // Delete the order details first
+    await connection.execute("DELETE FROM order_details WHERE order_id = ?", [
       orderId,
     ]);
 
-    // Ensuite, supprimer la commande principale
-    await connection.execute("DELETE FROM  purchase_orders WHERE id = ?", [
+    // Then, delete the main order
+    await connection.execute("DELETE FROM purchase_orders WHERE id = ?", [
       orderId,
     ]);
 
@@ -123,4 +127,4 @@ async function deleteOrder(orderId) {
   }
 }
 
-module.exports = { getOrders, addOrder, updateOrder, deleteOrder };
+module.exports = { getOrder, addOrder, updateOrder, deleteOrder };
