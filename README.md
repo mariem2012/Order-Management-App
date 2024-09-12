@@ -25,7 +25,7 @@ Suivez ces étapes pour configurer le projet sur votre machine locale :
 2. **Accédez au dossier du projet :**
 
    ```bash
-   cd Update-ABC-Corporation
+   cd src
    ```
 
 3. **Installez les dépendances :**
