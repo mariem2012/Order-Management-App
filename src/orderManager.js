@@ -1,18 +1,62 @@
-const pool = require("./database");
+const pool = require("../database");
 
-async function getOrder() {
+async function orderIdExists(id) {
   const connection = await pool.getConnection();
   try {
     const [rows] = await connection.execute(
-      `SELECT po.id AS order_id, po.date, po.delivery_address, po.track_number, po.status, po.customer_id, 
-              od.product_id, od.quantity, od.price
-       FROM purchase_orders po
-       LEFT JOIN order_details od ON po.id = od.order_id
-       ORDER BY po.id`
+      "SELECT * FROM purchase_orders WHERE id = ?",
+      [id]
+    );
+    return rows.length > 0;
+  } finally {
+    connection.release();
+  }
+}
+
+async function trackNumberExists(track_number, idToExclude = null) {
+  const connection = await pool.getConnection();
+  try {
+    let query = "SELECT * FROM purchase_orders  WHERE track_number = ?";
+    let params = [track_number];
+
+    if (idToExclude) {
+      query += " AND id != ?";
+      params.push(idToExclude);
+    }
+
+    const [rows] = await connection.execute(query, params);
+    return rows.length > 0;
+  } finally {
+    connection.release();
+  }
+}
+
+async function getOrder(id) {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.execute(
+      `SELECT *
+       FROM purchase_orders WHERE id = ?`,
+      [id]
     );
 
-    console.table(rows);
-    return rows;
+    const [rowsDetail] = await connection.execute(
+      `SELECT *
+       FROM order_details WHERE order_id = ?`,
+      [id]
+    );
+
+    if (rows.length == 0) {
+      console.log(`\nOrder: ${id} does not exist\n`);
+    } else if (rows.length > 0 && rowsDetail.length == 0) {
+      console.table(rows);
+      console.log(`\nThis order doesn't have orderDetails\n`);
+      return rows;
+    } else {
+      console.table(rows);
+      console.table(rowsDetail);
+      return rows;
+    }
   } catch (error) {
     throw error;
   } finally {
@@ -107,24 +151,36 @@ async function deleteOrder(orderId) {
   try {
     await connection.beginTransaction();
 
-    // Delete the order details first
     await connection.execute("DELETE FROM order_details WHERE order_id = ?", [
       orderId,
     ]);
 
-    // Then, delete the main order
-    await connection.execute("DELETE FROM purchase_orders WHERE id = ?", [
-      orderId,
-    ]);
+    const [result] = await connection.execute(
+      "DELETE FROM purchase_orders WHERE id = ?",
+      [orderId]
+    );
+
+    if (result.affectedRows > 0) {
+      console.log(`Order (ID: ${orderId}) deleted successfully.`);
+    } else {
+      console.log(`No order found with ID: ${orderId}`);
+    }
 
     await connection.commit();
     return true;
   } catch (error) {
     await connection.rollback();
-    throw error;
+    console.error(`Error deleting order with ID ${orderId}: ${error.message}`);
   } finally {
     connection.release();
   }
 }
 
-module.exports = { getOrder, addOrder, updateOrder, deleteOrder };
+module.exports = {
+  getOrder,
+  addOrder,
+  updateOrder,
+  deleteOrder,
+  orderIdExists,
+  trackNumberExists,
+};

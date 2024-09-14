@@ -1,4 +1,4 @@
-# ABC Corporation
+# Order Management App
 
 ## Description
 
@@ -8,9 +8,8 @@ Cette application console Node.js permet de gérer les opérations CRUD (Create,
 
 Avant de commencer, assurez-vous d'avoir installé les éléments suivants :
 
-- [Node.js](https://nodejs.org/) (version 12 ou supérieure)
-- Une base de données MySQL doit être en cours d'exécution.
-- Installez les dependances nécessaires comme [MYSQL2] et [readlineSyunc].
+- [Node.js](https://nodejs.org/) (version 14 ou supérieure).
+- [MySQL] (version 5.7 ou supérieure)
 
 ## Installation
 
@@ -19,13 +18,13 @@ Suivez ces étapes pour configurer le projet sur votre machine locale :
 1. **Clonez le repository :**
 
    ```bash
-   git clone https://github.com/mariem2012/Update-ABC-Corporation.git
+   git clone https://github.com/mariem2012/Order-Management-App.git
    ```
 
 2. **Accédez au dossier du projet :**
 
    ```bash
-   cd src
+   cd Order-Management-App
    ```
 
 3. **Installez les dépendances :**
@@ -33,6 +32,13 @@ Suivez ces étapes pour configurer le projet sur votre machine locale :
    ```bash
    npm install
    ```
+
+4. **Configurer la base de données :**
+
+- Assurez-vous que MySQL est en cours d'exécution.
+
+- Ouvrez le fichier database.js situé à la racine du projet. Vous devrez modifier les paramètres de connexion (hôte, utilisateur, mot de passe, nom de la base de
+  données) pour qu'ils correspondent à votre environnement de développement local.
 
 ## Utilisation
 

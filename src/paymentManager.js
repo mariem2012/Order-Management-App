@@ -1,4 +1,17 @@
-const pool = require("./database");
+const pool = require("../database");
+
+async function paymentIdExists(id) {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.execute(
+      "SELECT * FROM payments WHERE id = ?",
+      [id]
+    );
+    return rows.length > 0;
+  } finally {
+    connection.release();
+  }
+}
 
 async function getPayment() {
   const connection = await pool.getConnection();
@@ -20,7 +33,7 @@ async function addPayment(date, amount, payment_method, order_id) {
       "INSERT INTO   payments (date, amount, payment_method, order_id) VALUES (?, ?, ?, ?)",
       [date, amount, payment_method, order_id]
     );
-    console.log("Payment: with ${id} has been added", result.insertId);
+    console.log(`Payment: with ${id} has been added`, result.insertId);
   } catch (error) {
     throw error;
   } finally {
@@ -35,7 +48,7 @@ async function updatePayment(id, date, amount, payment_method, order_id) {
       "UPDATE  payments SET date = ?, amount = ?, payment_method = ?, order_id = ?, WHERE id = ?",
       [date, amount, payment_method, order_id, id]
     );
-    return result.affectedRows;
+    console.log(`Payment: with ${id} has been added`, result.insertId);
   } catch (error) {
     throw error;
   } finally {
@@ -47,20 +60,26 @@ async function deletePayment(id) {
   const connection = await pool.getConnection();
   try {
     const [result] = await connection.execute(
-      "DELETE FROM  payments WHERE id = ?",
+      "DELETE FROM payments WHERE id = ?",
       [id]
     );
-    return result.affectedRows;
-  } catch (error) {
-    if (error.code === "ER_ROW_IS_REFERENCED_2") {
-      throw new Error(
-        `Error of deleted : the payment ${id} is référence by another table.`
-      );
+
+    if (result.affectedRows > 0) {
+      console.log(`Payment with ID: ${id} has been deleted successfully.`);
+    } else {
+      console.log(`Failed to delete payment with ID: ${id}.`);
     }
-    throw error;
+  } catch (error) {
+    console.error("Error deleting payment:", error.message);
   } finally {
     connection.release();
   }
 }
 
-module.exports = { getPayment, addPayment, updatePayment, deletePayment };
+module.exports = {
+  getPayment,
+  addPayment,
+  updatePayment,
+  deletePayment,
+  paymentIdExists,
+};
