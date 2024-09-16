@@ -75,7 +75,6 @@ async function addCustomer(name, address, email, phone) {
     );
     console.log(`Customer has been created successfully`);
   } catch (error) {
-    // console.error("Error adding customer:", error.message);
     if (error.code === "ER_DUP_ENTRY") {
       console.error("Error adding customer: Email or phone already exists.");
     } else {
@@ -120,7 +119,13 @@ async function deleteCustomer(id) {
       console.log(`Failed to delete customer with ID: ${id}.`);
     }
   } catch (error) {
-    console.error("Error deleting customer:", error.message);
+    if ((error = "ER_ROW_IS_REFERENCED_2")) {
+      console.log(
+        `Error Unable to delete order with ID ${id}, because it has associated order records.`
+      );
+    } else {
+      console.log("Error to deleting");
+    }
   } finally {
     connection.release();
   }

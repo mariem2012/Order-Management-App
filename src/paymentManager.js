@@ -30,10 +30,12 @@ async function addPayment(date, amount, payment_method, order_id) {
   const connection = await pool.getConnection();
   try {
     const [result] = await connection.execute(
-      "INSERT INTO   payments (date, amount, payment_method, order_id) VALUES (?, ?, ?, ?)",
+      "INSERT INTO payments (date, amount, payment_method, order_id) VALUES (?, ?, ?, ?)",
       [date, amount, payment_method, order_id]
     );
-    console.log(`Payment: with ${id} has been added`, result.insertId);
+    console.log(
+      `Payment with ID ${result.insertId} has been added successfully.`
+    );
   } catch (error) {
     throw error;
   } finally {
@@ -45,10 +47,10 @@ async function updatePayment(id, date, amount, payment_method, order_id) {
   const connection = await pool.getConnection();
   try {
     const [result] = await connection.execute(
-      "UPDATE  payments SET date = ?, amount = ?, payment_method = ?, order_id = ?, WHERE id = ?",
+      "UPDATE payments SET date = ?, amount = ?, payment_method = ?, order_id = ? WHERE id = ?",
       [date, amount, payment_method, order_id, id]
     );
-    console.log(`Payment: with ${id} has been added`, result.insertId);
+    console.log(`Payment with ID ${id} has been updated successfully.`);
   } catch (error) {
     throw error;
   } finally {
@@ -63,7 +65,6 @@ async function deletePayment(id) {
       "DELETE FROM payments WHERE id = ?",
       [id]
     );
-
     if (result.affectedRows > 0) {
       console.log(`Payment with ID: ${id} has been deleted successfully.`);
     } else {

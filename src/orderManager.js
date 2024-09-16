@@ -55,7 +55,7 @@ async function getOrder(id) {
     } else {
       console.table(rows);
       console.table(rowsDetail);
-      return rows;
+      return { rows, rowsDetail };
     }
   } catch (error) {
     throw error;
@@ -169,8 +169,14 @@ async function deleteOrder(orderId) {
     await connection.commit();
     return true;
   } catch (error) {
+    if ((error = "ER_ROW_IS_REFERENCED_2")) {
+      console.log(
+        `Error Unable to delete order with ID ${orderId}, because it has associated payment records.`
+      );
+    } else {
+      console.log("Error to deleting");
+    }
     await connection.rollback();
-    console.error(`Error deleting order with ID ${orderId}: ${error.message}`);
   } finally {
     connection.release();
   }

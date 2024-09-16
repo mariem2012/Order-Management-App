@@ -415,10 +415,26 @@ async function purcharseOrder() {
           await getOrder(iD);
           break;
         case 2:
-          let date = readlineSync.question("Enter order date (YYYY-MM-DD): ");
-          while (date === "") {
-            console.log("Order date is required. Please enter a valid date.");
-            date = readlineSync.question("Enter order date: ");
+          let date;
+          while (true) {
+            try {
+              date = readlineSync.question("Enter order date (YYYY-MM-DD): ");
+
+              if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+                throw new Error(
+                  "Date format is invalid. Please use YYYY-MM-DD."
+                );
+              }
+
+              const parsedDate = new Date(date);
+              if (isNaN(parsedDate.getTime())) {
+                throw new Error("The entered date is not valid.");
+              }
+
+              break;
+            } catch (error) {
+              console.log(error.message);
+            }
           }
 
           let delivery_address = readlineSync.question(
@@ -435,9 +451,7 @@ async function purcharseOrder() {
 
           let track_number;
           while (true) {
-            track_number = readlineSync.question(
-              "Enter the new product barcode: "
-            );
+            track_number = readlineSync.question("Enter the track number: ");
             if (track_number === "") {
               console.log(
                 "The track number is required. Please enter a valid tracking number.."
@@ -490,9 +504,7 @@ async function purcharseOrder() {
                 // Add a product
                 let productId;
                 while (true) {
-                  productId = readlineSync.questionInt(
-                    "Enter the new product ID  : "
-                  );
+                  productId = readlineSync.questionInt("Enter product ID  : ");
 
                   if (await productIdExists(productId)) {
                     break;
@@ -546,14 +558,32 @@ async function purcharseOrder() {
             }
           }
 
-          let newDate = readlineSync.question(
-            "Enter new order date (YYYY-MM-DD): "
-          );
-          while (newDate === "") {
-            console.log("Order date is required. Please enter a valid date.");
-            newDate = readlineSync.question(
-              "Enter new order date (YYYY-MM-DD): "
-            );
+          let newDate;
+          while (true) {
+            try {
+              newDate = readlineSync.question(
+                "Enter new order date (YYYY-MM-DD): "
+              );
+
+              if (newDate === "") {
+                console.log("The date is required.");
+              }
+
+              if (!/^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
+                throw new Error(
+                  "Date format is invalid. Please use YYYY-MM-DD."
+                );
+              }
+
+              const parsedDate = new Date(newDate);
+              if (isNaN(parsedDate.getTime())) {
+                throw new Error("The entered date is not valid.");
+              }
+
+              break;
+            } catch (error) {
+              console.log(error.message);
+            }
           }
 
           let newDeliveryAddress = readlineSync.question(
@@ -571,7 +601,7 @@ async function purcharseOrder() {
           let newTrackNumber;
           while (true) {
             newTrackNumber = readlineSync.question(
-              "Enter the new product track number: "
+              "Enter the new order track number: "
             );
             if (newTrackNumber === "") {
               console.log(
@@ -639,6 +669,7 @@ async function purcharseOrder() {
                     );
                   }
                 }
+
                 const quantityUpdate =
                   readlineSync.questionInt("Enter quantity: ");
                 const priceUpdate = readlineSync.questionFloat("Enter price: ");
@@ -691,7 +722,6 @@ async function purcharseOrder() {
             }
           }
           await deleteOrder(orderIdToDelete);
-          console.log("Order deleted successfully.");
           break;
         case 5:
           console.log("Exiting the order menu...");
@@ -723,10 +753,26 @@ async function payment() {
           await getPayment();
           break;
         case 2:
-          let date = readlineSync.question("Enter payment date: ");
-          while (date === "") {
-            console.log("Payment date is required. Please enter a valid date.");
-            date = readlineSync.question("Enter payment date: ");
+          let date;
+          while (true) {
+            try {
+              date = readlineSync.question("Enter payment date (YYYY-MM-DD): ");
+
+              if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+                throw new Error(
+                  "Date format is invalid. Please use YYYY-MM-DD."
+                );
+              }
+
+              const parsedDate = new Date(date);
+              if (isNaN(parsedDate.getTime())) {
+                throw new Error("The entered date is not valid.");
+              }
+
+              break;
+            } catch (error) {
+              console.log(error.message);
+            }
           }
 
           const amount = readlineSync.questionFloat("Enter payment amount: ");
@@ -734,7 +780,7 @@ async function payment() {
           let paymentMethod = readlineSync.question("Enter payment_method: ");
           while (paymentMethod === "") {
             console.log(
-              "Payment payment_method is required. Please enter a valid payment _methode."
+              "Payment method is required. Please enter a valid payment method."
             );
             paymentMethod = readlineSync.question("Enter payment method: ");
           }
@@ -742,7 +788,6 @@ async function payment() {
           let orderId;
           while (true) {
             orderId = readlineSync.questionInt("Enter order ID : ");
-
             if (await orderIdExists(orderId)) {
               break;
             } else {
@@ -757,9 +802,8 @@ async function payment() {
           let paymentIdToUpdate;
           while (true) {
             paymentIdToUpdate = readlineSync.questionInt(
-              "Enter new payment ID : "
+              "Enter payment ID to update: "
             );
-
             if (await paymentIdExists(paymentIdToUpdate)) {
               break;
             } else {
@@ -768,14 +812,33 @@ async function payment() {
               );
             }
           }
-          let newdate = readlineSync.question("Enter new payment date: ");
-          while (newdate === "") {
-            console.log("Payment date is required. Please enter a valid date.");
-            newdate = readlineSync.question("Enter new payment date: ");
+
+          let newdate;
+          while (true) {
+            try {
+              newdate = readlineSync.question(
+                "Enter payment date (YYYY-MM-DD): "
+              );
+
+              if (!/^\d{4}-\d{2}-\d{2}$/.test(newdate)) {
+                throw new Error(
+                  "Date format is invalid. Please use YYYY-MM-DD."
+                );
+              }
+
+              const parsedDate = new Date(newdate);
+              if (isNaN(parsedDate.getTime())) {
+                throw new Error("The entered date is not valid.");
+              }
+
+              break;
+            } catch (error) {
+              console.log(error.message);
+            }
           }
 
           const newamount = readlineSync.questionFloat(
-            "Enter payment new amount: "
+            "Enter new payment amount: "
           );
 
           let newpaymentMethod = readlineSync.question(
@@ -783,7 +846,7 @@ async function payment() {
           );
           while (newpaymentMethod === "") {
             console.log(
-              "Payment n payment_method is required. Please enter a valid payment _methode."
+              "Payment method is required. Please enter a valid payment method."
             );
             newpaymentMethod = readlineSync.question(
               "Enter new payment method: "
@@ -793,7 +856,6 @@ async function payment() {
           let neworderId;
           while (true) {
             neworderId = readlineSync.questionInt("Enter new order ID : ");
-
             if (await orderIdExists(neworderId)) {
               break;
             } else {
@@ -814,9 +876,8 @@ async function payment() {
           let paymentIdToDelete;
           while (true) {
             paymentIdToDelete = readlineSync.questionInt(
-              "Enter delete payment ID : "
+              "Enter payment ID to delete: "
             );
-
             if (await paymentIdExists(paymentIdToDelete)) {
               break;
             } else {
@@ -825,7 +886,7 @@ async function payment() {
               );
             }
           }
-          await deletePayment(iD);
+          await deletePayment(paymentIdToDelete);
           break;
         case 5:
           console.log("\nExiting the payment menu...\n");
@@ -836,7 +897,7 @@ async function payment() {
       }
     }
   } catch (e) {
-    throw e.message;
+    console.error("An error occurred:", e.message);
   }
 }
 
