@@ -21,6 +21,7 @@ const {
 
 const {
   getOrder,
+  getOrders,
   addOrder,
   updateOrder,
   deleteOrder,
@@ -402,19 +403,23 @@ async function purcharseOrder() {
     let choose = 0;
     while (choose !== 5) {
       console.log(`----- Order Menu -----`);
-      console.log("1. Get purcharse order");
-      console.log("2. Add a purcharse order");
-      console.log("3. Update purcharse order information");
-      console.log("4. Delete a purcharse order");
-      console.log("5. Exit the order menu");
+      console.log("1. Get all purcharse order");
+      console.log("2. Get purcharse order");
+      console.log("3. Add a purcharse order");
+      console.log("4. Update purcharse order information");
+      console.log("5. Delete a purcharse order");
+      console.log("6. Exit the order menu");
       choose = readlineSync.questionInt("Choose an option: ");
 
       switch (choose) {
         case 1:
+          await getOrders();
+          break;
+        case 2:
           const iD = readlineSync.questionInt("Enter order id: ");
           await getOrder(iD);
           break;
-        case 2:
+        case 3:
           let date;
           while (true) {
             try {
@@ -543,7 +548,7 @@ async function purcharseOrder() {
             }
           }
           break;
-        case 3:
+        case 4:
           // Update order
           let orderIdToUpdate;
           while (true) {
@@ -705,7 +710,7 @@ async function purcharseOrder() {
             }
           }
           break;
-        case 4:
+        case 5:
           // Delete the order
           let orderIdToDelete;
           while (true) {
@@ -723,7 +728,7 @@ async function purcharseOrder() {
           }
           await deleteOrder(orderIdToDelete);
           break;
-        case 5:
+        case 6:
           console.log("Exiting the order menu...");
           break;
         default:

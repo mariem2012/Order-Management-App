@@ -31,6 +31,20 @@ async function trackNumberExists(track_number, idToExclude = null) {
   }
 }
 
+async function getOrders() {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.execute("SELECT * FROM purchase_orders");
+
+    console.table(rows);
+    return rows;
+  } catch (error) {
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
 async function getOrder(id) {
   const connection = await pool.getConnection();
   try {
@@ -189,4 +203,5 @@ module.exports = {
   deleteOrder,
   orderIdExists,
   trackNumberExists,
+  getOrders,
 };
